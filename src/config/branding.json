@@ -4,13 +4,13 @@
     "tagline": "Strong Foundations. Smarter Learning.",
 
     "primaryColor": "#6366f1",
-    "theme": "darkModern",
+    "theme": "schoolAcademic",
 
     "logo": "/logo.png",
     "students": "300+",
 
     "colors": {
-      "primary": "#c0c2cc",
+      "primary": "#b2ebff",
       "accent": "#3b4786"
     },
 
