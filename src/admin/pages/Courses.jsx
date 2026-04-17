@@ -2,7 +2,8 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import api from "../../shared/api";
 import { useBranding } from "../../shared/hooks/useBranding";
-import { Plus, MoreVertical, Users, IndianRupee, Trash2, Edit3, Settings, X } from "lucide-react";
+import { Plus, MoreVertical, Users, IndianRupee, Trash2, Edit3, Settings, X, Calendar, ClipboardCheck } from "lucide-react";
+
 
 export default function Courses() {
   const [courses, setCourses] = useState([]);
@@ -17,9 +18,18 @@ export default function Courses() {
     startTime: "",
     endTime: "",
   });
+  const [showTestModal, setShowTestModal] = useState(false);
   const [nextLive, setNextLive] = useState(null);
   const [now, setNow] = useState(new Date());
+  
+  function openTestModal() {
+    if (!active) return;
 
+    // optional: preload existing test
+    // setTestForm(active.test || {});
+
+    navigate(`/admin/tests`);
+  }
   const load = async () => {
     try {
       const { data } = await api.get("/courses");
@@ -341,17 +351,25 @@ export default function Courses() {
 
                 </div>
               )}
-              <button
-                onClick={() => setShowLiveModal(true)}
-                className="flex items-center justify-center gap-2 py-4 rounded-2xl bg-purple-600 text-white text-[12px] font-bold transition-all"
-              >
-                📅 Schedule Live
-              </button>
+
+
               {/* Buttons - These stay at the bottom of the scrollable content */}
               <div className="grid grid-cols-2 gap-3 pt-2">
                 <button
+                  onClick={() => setShowLiveModal(true)}
+                  className="flex items-center justify-center gap-2 py-4 rounded-2xl bg-purple-600 text-white text-[12px] font-bold transition-all">
+                  <Calendar size={14} />
+                  Schedule Live
+                </button>
+                <button
+                  onClick={openTestModal}
+                  className="flex items-center justify-center gap-2 py-4 rounded-2xl bg-indigo-600 text-white text-[12px] font-bold transition-all hover:scale-[1.02]">
+                  <ClipboardCheck size={14} />
+                  Test & Certification
+                </button>
+                <button
                   onClick={() => navigate(`/admin/courses/${active.id}`)}
-                  className="flex items-center justify-center gap-2 py-4 rounded-2xl bg-slate-50 text-[12px] font-bold text-slate-700 hover:bg-slate-100 transition-all"
+                  className="flex items-center justify-center gap-2 py-4 rounded-2xl bg-slate-200 text-[12px] font-bold text-slate-700 hover:bg-slate-100 transition-all"
                 >
                   <Edit3 size={14} />
                   Edit Details
@@ -363,10 +381,10 @@ export default function Courses() {
                   style={{ backgroundColor: primary }}
                 >
                   <Settings size={14} />
-                  Manage Content
+                  Units & Chapters
                 </button>
                 {active.isLive && (
-                  <button
+                  <button disabled={1}
                     onClick={() => stopLive(active.id)}
                     className="flex items-center justify-center gap-2 py-4 rounded-2xl text-white text-[12px] font-bold transition-all"
                     style={{
@@ -374,7 +392,7 @@ export default function Courses() {
                     }}
                   >
                     <Settings size={14} />
-                    Stop Live
+                    Stop Course
                   </button>
                 )}
                 {!active.isLive && (
@@ -496,6 +514,7 @@ export default function Courses() {
           </div>
         </div>
       )}
+
     </div>
   );
 }

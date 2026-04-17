@@ -7,7 +7,7 @@ export default function EditCourse() {
   const navigate = useNavigate();
   const [error, setError] = useState("");
   const isNew = id === "new";
-
+  const PLAN_OPTIONS = [2, 3, 6, 12];
   const [form, setForm] = useState({
     title: "",
     description: "",
@@ -15,6 +15,7 @@ export default function EditCourse() {
     oldPrice: "",
     thumbnail: "",
     introBunnyVideoId: "",
+    installmentOptions: [],
   });
 
   const [uploading, setUploading] = useState(false);
@@ -35,6 +36,9 @@ export default function EditCourse() {
           oldPrice: data.oldPrice ?? "",
           thumbnail: data.thumbnail || "",
           introBunnyVideoId: data.introBunnyVideoId || "",
+          installmentOptions: Array.isArray(data.installmentOptions)
+            ? data.installmentOptions
+            : JSON.parse(data.installmentOptions || "[]"),
         });
       } catch (err) {
         console.error(err);
@@ -142,6 +146,7 @@ export default function EditCourse() {
       ...form,
       price: Number(form.price),
       oldPrice: form.oldPrice ? Number(form.oldPrice) : null,
+      installmentOptions: form.installmentOptions || [],
     };
 
     try {
@@ -213,6 +218,50 @@ export default function EditCourse() {
               onChange={(e) => setForm({ ...form, oldPrice: e.target.value })}
             />
           </div>
+        </div>
+
+        {/* SECTION: INSTALLMENTS */}
+        {/* SECTION: PAYMENT PLANS */}
+        <div className="space-y-3">
+          <h3 className="text-sm font-semibold text-gray-800">Payment Plans</h3>
+
+          <div className="flex flex-wrap gap-2">
+
+            {/* ONE TIME (ALWAYS AVAILABLE) */}
+            <div className="px-4 py-2 rounded-lg text-sm font-semibold bg-slate-900 text-white">
+              One-time
+            </div>
+
+            {/* DYNAMIC INSTALLMENTS */}
+            {PLAN_OPTIONS.map((months) => {
+              const active = form.installmentOptions.includes(months);
+
+              return (
+                <button
+                  key={months}
+                  type="button"
+                  onClick={() => {
+                    setForm((p) => ({
+                      ...p,
+                      installmentOptions: active
+                        ? p.installmentOptions.filter(x => x !== months)
+                        : [...p.installmentOptions, months].sort((a, b) => a - b)
+                    }));
+                  }}
+                  className={`px-4 py-2 rounded-lg text-sm font-medium border transition ${active
+                    ? "bg-green-600 text-white border-green-600"
+                    : "bg-white text-gray-600 border-gray-300 hover:border-gray-400"
+                    }`}
+                >
+                  {months} mo
+                </button>
+              );
+            })}
+          </div>
+
+          <p className="text-xs text-gray-400">
+            Users will always have one-time payment. Select optional installment plans.
+          </p>
         </div>
 
         {/* SECTION: MEDIA */}

@@ -51,44 +51,107 @@ export default function MyCourses() {
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
         {/* Existing Course Cards */}
-        {courses.map((p) => (
-          <div
-            key={p.id}
-            className="group bg-white rounded-2xl border border-slate-200 overflow-hidden hover:shadow-xl hover:-translate-y-1 transition-all duration-300"
-          >
-            {/* Thumbnail Wrapper */}
-            <div className="relative aspect-video bg-slate-100 overflow-hidden">
-              {p.course?.thumbnail ? (
-                <img
-                  src={getImgUrl(p.course.thumbnail)}
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                  alt={p.course.title}
-                />
-              ) : (
-                <div className="h-full flex items-center justify-center text-xs text-slate-400 font-medium">
-                  No Thumbnail Available
+        {courses.map((p) => {
+          // 🔹 Installment logic
+          const nextInstallment = p.installments?.find(i => !i.paid);
+
+          const now = new Date();
+          const dueDate = nextInstallment?.dueDate
+            ? new Date(nextInstallment.dueDate)
+            : null;
+
+          const diff = dueDate ? dueDate - now : null;
+
+          const isDue = dueDate && now >= dueDate;
+          const isNearDue =
+            dueDate && diff <= 3 * 24 * 60 * 60 * 1000 && diff > 0;
+          const isFar = dueDate && diff > 3 * 24 * 60 * 60 * 1000;
+
+          return (
+            <div
+              key={p.id}
+              className="group bg-white rounded-2xl border border-slate-200 overflow-hidden hover:shadow-xl hover:-translate-y-1 transition-all duration-300"
+            >
+              {/* Thumbnail */}
+              <div className="relative aspect-video bg-slate-100 overflow-hidden">
+                {p.course?.thumbnail ? (
+                  <img
+                    src={getImgUrl(p.course.thumbnail)}
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                    alt={p.course.title}
+                  />
+                ) : (
+                  <div className="h-full flex items-center justify-center text-xs text-slate-400 font-medium">
+                    No Thumbnail Available
+                  </div>
+                )}
+
+                {/* Hover overlay */}
+                <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                  <PlayCircle className="text-white w-12 h-12" />
                 </div>
-              )}
-              {/* Hover Overlay */}
-              <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                <PlayCircle className="text-white w-12 h-12" />
+              </div>
+
+              <div className="p-5 flex flex-col h-[180px]">
+                {/* Title */}
+                <h3 className="font-bold text-slate-800 line-clamp-2 text-lg leading-tight">
+                  {p.course?.title}
+                </h3>
+
+                {/* 💳 INSTALLMENT STATUS */}
+                {nextInstallment && (
+                  <div
+                    className={`mt-3 text-xs rounded-lg px-3 py-2 flex items-center justify-between
+            ${isDue
+                        ? "bg-red-50 border border-red-200 text-red-700"
+                        : isNearDue
+                          ? "bg-yellow-50 border border-yellow-200 text-yellow-700"
+                          : "bg-slate-50 border border-slate-200 text-slate-500"
+                      }`}
+                  >
+                    <div>
+                      {isDue
+                        ? "Overdue"
+                        : isNearDue
+                          ? "Due soon"
+                          : "Next payment"}
+
+                      {dueDate && (
+                        <span className="ml-1 opacity-70">
+                          · {dueDate.toLocaleDateString()}
+                        </span>
+                      )}
+                    </div>
+
+                    {(isDue || isNearDue) && (
+                      <button
+                        onClick={() => navigate(`/student/watch/${p.courseId}`)}
+                        className="text-xs font-semibold underline hover:opacity-80"
+                      >
+                        Pay
+                      </button>
+                    )}
+                  </div>
+                )}
+
+                {/* 📊 Progress (optional but nice) */}
+                {p.installments?.length > 0 && (
+                  <p className="text-[11px] text-slate-400 mt-2">
+                    {p.installments.filter(i => i.paid).length} / {p.installments.length} paid
+                  </p>
+                )}
+
+                {/* CTA */}
+                <button
+                  onClick={() => navigate(`/student/watch/${p.courseId}`)}
+                  className="w-full py-2.5 mt-auto rounded-xl bg-slate-900 hover:bg-black text-white text-sm font-bold flex items-center justify-center gap-2 transition-colors"
+                >
+                  Continue Learning
+                </button>
               </div>
             </div>
-
-            <div className="p-5 flex flex-col h-[160px]">
-              <h3 className="font-bold text-slate-800 line-clamp-2 text-lg leading-tight flex-grow">
-                {p.course?.title}
-              </h3>
-
-              <button
-                onClick={() => navigate(`/student/watch/${p.courseId}`)}
-                className="w-full py-2.5 mt-4 rounded-xl bg-slate-900 hover:bg-black text-white text-sm font-bold flex items-center justify-center gap-2 transition-colors"
-              >
-                Continue Learning
-              </button>
-            </div>
-          </div>
-        ))}
+          );
+        })}
 
         {/* Explore More Card */}
         <button
