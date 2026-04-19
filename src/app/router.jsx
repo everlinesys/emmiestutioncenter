@@ -28,6 +28,14 @@ import Terms from "../public/pages/Terms";
 import Privacy from "../public/pages/Privacy";
 import AboutUs from "../public/components/AboutUs";
 
+
+import AdminTeachers from "../admin/pages/Teachers";
+import TeacherLayout from "../teacher/layout/TeacherLayout";
+import TeacherDashboard from "../teacher/pages/TeacherDashboard";
+import TeacherCourses from "../teacher/pages/TeacherCourses";
+import TeacherStudents from "../teacher/pages/TeacherStudents";
+
+
 export const router = createBrowserRouter([
     {
         path: "/",
@@ -88,6 +96,25 @@ export const router = createBrowserRouter([
             },
         ],
     },
+    {
+        path: "/teacher",
+        element: <ProtectedRoute role="TEACHER" />,
+        children: [
+            {
+
+                element: <TeacherLayout />,
+                children: [
+                    { index: true, element: <TeacherDashboard /> },
+                    { path: "courses", element: <TeacherCourses /> },
+                    // { path: "courses/:id", element: <EditCourse /> },
+                    { path: "course/:id/manage", element: <CourseCurriculum /> },
+                    { path: "students", element: <TeacherStudents /> },
+                    { path: "tests", element: <Tests /> },
+                ],
+            },
+        ],
+    },
+
 
     {
         path: "*",
