@@ -7,6 +7,7 @@ export default function UnitEditor({ unit }) {
   const [title, setTitle] = useState("");
   const [desc, setDesc] = useState("");
   const [file, setFile] = useState(null);
+  const [pdfs, setPdfs] = useState([]);
 
   const [editing, setEditing] = useState(null);
 
@@ -78,13 +79,14 @@ export default function UnitEditor({ unit }) {
     e.preventDefault();
 
     if (!title || !file)
-      return alert("Title and video required");
+      return alert("Title and file required");
 
     try {
       setUploading(true);
       setProgress(0);
 
       const videoId = await uploadVideo(title);
+      const pdfUrls = await uploadPDFs();
 
       await api.post(
         "/chapters",
@@ -95,6 +97,7 @@ export default function UnitEditor({ unit }) {
           bunnyVideoId: videoId,
           bunnyLibraryId:
             import.meta.env.VITE_BUNNY_LIBRARY_ID,
+          pdfUrls,
         },
         {
           headers: {
@@ -135,6 +138,11 @@ export default function UnitEditor({ unit }) {
       if (file) {
         videoId = await uploadVideo(title);
       }
+      let pdfUrls;
+
+      if (pdfs.length) {
+        pdfUrls = await uploadPDFs();
+      }
 
       await api.put(
         `/chapters/${editing}`,
@@ -145,7 +153,8 @@ export default function UnitEditor({ unit }) {
             bunnyVideoId: videoId,
             bunnyLibraryId:
               import.meta.env.VITE_BUNNY_LIBRARY_ID,
-          }),
+
+          }), ...(pdfUrls && { pdfUrls })
         },
         {
           headers: {
@@ -186,7 +195,65 @@ export default function UnitEditor({ unit }) {
     setDesc("");
     setFile(null);
     setProgress(0);
+    setPdfs([]);
     if (fileRef.current) fileRef.current.value = "";
+  }
+  function handlePdfSelect(files) {
+    const fileArray = Array.from(files);
+
+    if (fileArray.length > 5) {
+      return alert("Max 5 PDFs allowed");
+    }
+
+    for (let f of fileArray) {
+      if (f.type !== "application/pdf") {
+        return alert("Only PDF files allowed");
+      }
+
+      if (f.size > 5 * 1024 * 1024) {
+        return alert(`${f.name} exceeds 5MB`);
+      }
+    }
+
+    setPdfs(fileArray);
+  }
+
+
+  async function uploadPDFs() {
+    if (!pdfs.length) return [];
+
+    if (!unit?.id) {
+      throw new Error("Unit ID missing");
+    }
+
+    const uploadedUrls = [];
+
+    for (let pdf of pdfs) {
+      const safeName = pdf.name.replace(/\s+/g, "-");
+
+      const filePath = `${unit.id}/${Date.now()}-${safeName}`;
+
+      const uploadUrl = `https://storage.bunnycdn.com/${import.meta.env.VITE_BUNNY_STORAGE_ZONE}/${filePath}`;
+
+      const res = await fetch(uploadUrl, {
+        method: "PUT",
+        headers: {
+          AccessKey: import.meta.env.VITE_BUNNY_STORAGE_KEY,
+          "Content-Type": "application/pdf",
+        },
+        body: pdf,
+      });
+
+      if (!res.ok) {
+        throw new Error("Upload failed");
+      }
+
+      const fileUrl = `${import.meta.env.VITE_BUNNY_PULL_ZONE}/${filePath}`;
+
+      uploadedUrls.push(fileUrl);
+    }
+
+    return uploadedUrls;
   }
 
   return (
@@ -277,6 +344,19 @@ export default function UnitEditor({ unit }) {
             : editing
               ? "Select new video to replace (optional)"
               : "Click to select video"}
+        </label>
+
+        <label className="block cursor-pointer bg-slate-950 border border-slate-700 rounded-lg p-4 text-center text-sm text-slate-400 hover:border-green-500">
+          <input
+            type="file"
+            accept="application/pdf"
+            multiple
+            className="hidden"
+            onChange={(e) => handlePdfSelect(e.target.files)}
+          />
+          {pdfs.length > 0
+            ? `${pdfs.length} PDF(s) selected`
+            : "Attach up to 5 PDFs (max 5MB each)"}
         </label>
 
         {uploading && (
