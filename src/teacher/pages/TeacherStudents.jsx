@@ -7,8 +7,21 @@ export default function TeacherStudents() {
   const [query, setQuery] = useState("");
   const [loading, setLoading] = useState(false);
 
+  const [selected, setSelected] = useState({});
+  const [groupName, setGroupName] = useState("");
+  const [groups, setGroups] = useState([]);
+
+  const [liveData, setLiveData] = useState({
+    title: "",
+    meetLink: "",
+    startTime: "",
+    endTime: "",
+    groupId: "",
+  });
+
   useEffect(() => {
     load();
+    loadGroups();
   }, []);
 
   /* ================= LOAD ================= */
@@ -22,6 +35,15 @@ export default function TeacherStudents() {
       alert("Failed to load students");
     } finally {
       setLoading(false);
+    }
+  }
+
+  async function loadGroups() {
+    try {
+      const res = await api.get("/teacher/groups");
+      setGroups(res.data || []);
+    } catch {
+      console.log("Failed to load groups");
     }
   }
 
@@ -56,20 +78,176 @@ export default function TeacherStudents() {
   const toggle = (id) =>
     setExpanded((p) => ({ ...p, [id]: !p[id] }));
 
+  /* ================= SELECT ================= */
+
+  const toggleSelect = (id) => {
+    setSelected((prev) => ({
+      ...prev,
+      [id]: !prev[id],
+    }));
+  };
+
+  const selectedIds = Object.keys(selected)
+    .filter((id) => selected[id])
+    .map(Number);
+
+  /* ================= CREATE GROUP ================= */
+
+  const createGroup = async () => {
+    if (!groupName || selectedIds.length === 0) {
+      return alert("Group name + students required");
+    }
+
+    try {
+      await api.post("/teacher/groups", {
+        name: groupName,
+        studentIds: selectedIds,
+      });
+
+      alert("Group created");
+
+      setGroupName("");
+      setSelected({});
+      loadGroups();
+    } catch {
+      alert("Failed to create group");
+    }
+  };
+
+  /* ================= CREATE LIVE ================= */
+
+  const createLive = async () => {
+    if (!liveData.groupId) {
+      return alert("Please select a group");
+    }
+
+    if (!liveData.title || !liveData.meetLink) {
+      return alert("Missing fields");
+    }
+
+    try {
+      await api.post("/live-classes", {
+        title: liveData.title,
+        meetLink: liveData.meetLink,
+        startTime: liveData.startTime,
+        endTime: liveData.endTime,
+        groupId: Number(liveData.groupId),
+      });
+
+      alert("Live scheduled");
+
+      setLiveData({
+        title: "",
+        meetLink: "",
+        startTime: "",
+        endTime: "",
+        groupId: "",
+      });
+    } catch {
+      alert("Failed to create live");
+    }
+  };
+
   /* ================= UI ================= */
 
   return (
     <div className="min-h-screen bg-[#0f172a] text-slate-200 p-6 md:p-10">
-      <div className="max-w-5xl mx-auto space-y-8">
+      <div className="max-w-6xl mx-auto space-y-8">
 
         {/* HEADER */}
         <div className="border-b border-slate-800 pb-6">
           <h2 className="text-2xl font-bold text-white">
-            My Students
+            My Students & Groups
           </h2>
           <p className="text-slate-400 text-sm">
-            Students enrolled in your courses
+            Manage students, create groups, schedule live classes
           </p>
+        </div>
+
+        {/* CREATE GROUP */}
+        <div className="bg-slate-900 p-5 rounded-xl border border-slate-800 space-y-4">
+          <h3 className="font-semibold text-white">Create Group</h3>
+
+          <input
+            placeholder="Group Name"
+            value={groupName}
+            onChange={(e) => setGroupName(e.target.value)}
+            className="w-full bg-slate-800 border border-slate-700 px-3 py-2 rounded"
+          />
+
+          <p className="text-xs text-slate-400">
+            Selected Students: {selectedIds.length}
+          </p>
+
+          <button
+            onClick={createGroup}
+            className="bg-indigo-600 px-4 py-2 rounded text-sm"
+          >
+            Create Group
+          </button>
+        </div>
+
+        {/* CREATE LIVE */}
+        <div className="bg-slate-900 p-5 rounded-xl border border-slate-800 space-y-4">
+          <h3 className="font-semibold text-white">Create Live Class</h3>
+
+          <select
+            value={liveData.groupId}
+            onChange={(e) =>
+              setLiveData({ ...liveData, groupId: e.target.value })
+            }
+            className="w-full bg-slate-800 border border-slate-700 px-3 py-2 rounded"
+          >
+            <option value="">Select Group</option>
+            {groups.map((g) => (
+              <option key={g.id} value={g.id}>
+                {g.name} ({g.membersCount || 0})
+              </option>
+            ))}
+          </select>
+
+          <input
+            placeholder="Title"
+            value={liveData.title}
+            onChange={(e) =>
+              setLiveData({ ...liveData, title: e.target.value })
+            }
+            className="w-full bg-slate-800 border border-slate-700 px-3 py-2 rounded"
+          />
+
+          <input
+            placeholder="Meet Link"
+            value={liveData.meetLink}
+            onChange={(e) =>
+              setLiveData({ ...liveData, meetLink: e.target.value })
+            }
+            className="w-full bg-slate-800 border border-slate-700 px-3 py-2 rounded"
+          />
+
+          <input
+            type="datetime-local"
+            value={liveData.startTime}
+            onChange={(e) =>
+              setLiveData({ ...liveData, startTime: e.target.value })
+            }
+            className="w-full bg-slate-800 border border-slate-700 px-3 py-2 rounded"
+          />
+
+          <input
+            type="datetime-local"
+            value={liveData.endTime}
+            onChange={(e) =>
+              setLiveData({ ...liveData, endTime: e.target.value })
+            }
+            className="w-full bg-slate-800 border border-slate-700 px-3 py-2 rounded"
+          />
+
+          <button
+            onClick={createLive}
+            className="bg-green-600 px-4 py-2 rounded text-sm"
+          >
+            Schedule Live
+          </button>
         </div>
 
         {/* SEARCH */}
@@ -80,92 +258,37 @@ export default function TeacherStudents() {
           onChange={(e) => setQuery(e.target.value)}
         />
 
-        {/* LIST */}
+        {/* STUDENTS */}
         <div className="space-y-4">
           {loading && <p>Loading...</p>}
-
-          {!loading && filtered.length === 0 && (
-            <p className="text-slate-500 text-center py-10">
-              No students found
-            </p>
-          )}
 
           {filtered.map((u) => (
             <div
               key={u.id}
               className="bg-slate-900 border border-slate-800 rounded-xl"
             >
-              {/* HEADER ROW */}
-              <button
-                onClick={() => toggle(u.id)}
-                className="w-full flex justify-between p-4"
-              >
-                <div>
-                  <div className="font-bold text-white">
-                    {u.name || "Unnamed"}
-                  </div>
-                  <div className="text-xs text-slate-400">
-                    {u.email}
-                  </div>
+              <div className="flex items-center justify-between p-4">
+                <div className="flex items-center gap-3">
+                  <input
+                    type="checkbox"
+                    checked={!!selected[u.id]}
+                    onChange={() => toggleSelect(u.id)}
+                  />
 
-                  {/* COURSE COUNT */}
-                  <div className="text-xs text-indigo-400 mt-1">
-                    {u.purchases.length} courses
-                  </div>
-                </div>
-
-                <span>{expanded[u.id] ? "▲" : "▼"}</span>
-              </button>
-
-              {/* DETAILS */}
-              {expanded[u.id] && (
-                <div className="p-4 border-t border-slate-800 space-y-4">
-
-                  {/* COURSES */}
                   <div>
-                    <p className="text-xs text-slate-400 mb-2">
-                      Enrolled Courses
-                    </p>
-
-                    {u.purchases.length === 0 ? (
-                      <p className="text-sm text-slate-500">
-                        No courses
-                      </p>
-                    ) : (
-                      u.purchases.map((p) => (
-                        <div
-                          key={p.id}
-                          className="bg-slate-800 p-3 rounded mb-2"
-                        >
-                          <div className="flex justify-between text-sm">
-                            <span>{p.course?.title}</span>
-                            <span>
-                              {p.finalTestPassed
-                                ? "✅ Passed"
-                                : "⏳ Ongoing"}
-                            </span>
-                          </div>
-
-                          {/* PROGRESS BAR */}
-                          <div className="mt-2 bg-slate-700 h-1 rounded">
-                            <div
-                              className="bg-indigo-500 h-full"
-                              style={{
-                                width: `${p.progressPercent || 0}%`,
-                              }}
-                            />
-                          </div>
-
-                          <p className="text-xs mt-1 text-slate-400">
-                            {p.progressPercent || 0}%
-                          </p>
-                        </div>
-                      ))
-                    )}
+                    <div className="font-bold text-white">
+                      {u.name}
+                    </div>
+                    <div className="text-xs text-slate-400">
+                      {u.email}
+                    </div>
                   </div>
-
                 </div>
-              )}
+
+                <button onClick={() => toggle(u.id)}>
+                  {expanded[u.id] ? "▲" : "▼"}
+                </button>
+              </div>
             </div>
           ))}
         </div>

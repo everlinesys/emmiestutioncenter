@@ -4,7 +4,7 @@ import api from "../../shared/api";
 import { getUser } from "../../shared/auth";
 import { useBranding } from "../../shared/hooks/useBranding";
 import { Calendar, Clock, Video, Radio } from 'lucide-react';
-import { PlayCircle, BookOpen , CheckCircle,TrendingUp } from 'lucide-react';
+import { PlayCircle, BookOpen, CheckCircle, TrendingUp } from 'lucide-react';
 
 // import {
 //   ResponsiveContainer,
@@ -86,7 +86,7 @@ export default function Dashboard() {
     return now > new Date(end);
   }
   return (
-    <div className="space-y-10 p-4 md:p-0  overflow-x-auto">
+    <div className="space-y-10 p-4 md:p-0">
 
       {/* ===== HERO HEADER ===== */}
       <div
@@ -203,13 +203,21 @@ export default function Dashboard() {
             {liveClasses.map((lc) => {
               const live = isLive(lc.startTime, lc.endTime);
               const ended = isEnded(lc.endTime);
+
+              const label =
+                lc.group?.name ||
+                lc.course?.title ||
+                "General Session";
+
               return (
                 <div
                   key={lc.id}
-                  className={`relative overflow-hidden bg-white border rounded-2xl p-6 transition-all hover:shadow-md ${live ? "border-red-200 ring-1 ring-red-50" : "border-slate-200"
+                  className={`relative overflow-hidden bg-white border rounded-2xl p-6 transition-all hover:shadow-md ${live
+                      ? "border-red-200 ring-1 ring-red-50"
+                      : "border-slate-200"
                     }`}
                 >
-                  {/* Live Indicator Pulse */}
+                  {/* LIVE DOT */}
                   {live && (
                     <span className="absolute top-4 right-4 flex h-3 w-3">
                       <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
@@ -218,68 +226,74 @@ export default function Dashboard() {
                   )}
 
                   <div className="space-y-4">
-                    {/* Header: Course Category */}
+
+                    {/* HEADER */}
                     <div className="flex items-center gap-2">
                       <div className="p-1.5 bg-slate-100 rounded-md">
                         <Video size={14} className="text-slate-600" />
                       </div>
+
                       <p className="text-[10px] uppercase text-slate-500 font-bold tracking-widest">
-                        {lc.course?.title}
+                        {label}
                       </p>
                     </div>
 
-                    {/* Title & Time */}
-                    <div className="space-y-1">
-                      <h4 className="font-bold text-slate-900 leading-tight">
-                        {lc.title}
-                      </h4>
-                      <div className="flex items-center gap-2 text-slate-500">
-                        <Calendar size={14} />
-                        <p className="text-xs">
-                          {new Date(lc.startTime).toLocaleDateString([], { month: 'short', day: 'numeric' })}
-                        </p>
-                        <span className="text-slate-300">•</span>
-                        <Clock size={14} />
-                        <p className="text-xs">
-                          {new Date(lc.startTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                        </p>
-                      </div>
+                    {/* TITLE */}
+                    <h4 className="font-bold text-slate-900 leading-tight">
+                      {lc.title}
+                    </h4>
+
+                    {/* TIME */}
+                    <div className="flex items-center gap-2 text-slate-500 text-xs">
+                      <Calendar size={14} />
+                      {new Date(lc.startTime).toLocaleDateString([], {
+                        month: "short",
+                        day: "numeric",
+                      })}
+                      <span>•</span>
+                      <Clock size={14} />
+                      {new Date(lc.startTime).toLocaleTimeString([], {
+                        hour: "2-digit",
+                        minute: "2-digit",
+                      })}
                     </div>
 
-                    {/* Status / Countdown Section */}
-                    <div className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium ${live ? "bg-red-50 text-red-700" : "bg-indigo-50 text-indigo-700"
-                      }`}>
+                    {/* STATUS */}
+                    <div
+                      className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium ${live
+                          ? "bg-red-50 text-red-700"
+                          : ended
+                            ? "bg-slate-100 text-slate-500"
+                            : "bg-indigo-50 text-indigo-700"
+                        }`}
+                    >
+                      {live && <Radio size={16} className="animate-pulse" />}
+                      {!live && <Clock size={16} />}
 
                       <span className="font-mono">
-                        {live ? (
-                          <Radio size={16} className="animate-pulse" />
-                        ) : ended ? (
-                          <Clock size={16} />
-                        ) : (
-                          <Clock size={16} />
-                        )}
-
-                        <span className="font-mono">
-                          {live
-                            ? "Live Now"
-                            : ended
-                              ? "Session Ended"
-                              : getCountdown(lc.startTime)}
-                        </span>
+                        {live
+                          ? "Live Now"
+                          : ended
+                            ? "Session Ended"
+                            : getCountdown(lc.startTime)}
                       </span>
                     </div>
 
-                    {/* Join Button */}
+                    {/* BUTTON */}
                     <button
                       disabled={!live}
                       onClick={() => window.open(lc.meetLink, "_blank")}
                       className={`w-full py-2.5 rounded-xl text-sm font-bold flex items-center justify-center gap-2 transition-all active:scale-95 ${live
-                        ? "bg-slate-900 hover:bg-black text-white shadow-lg shadow-slate-200"
-                        : "bg-slate-100 text-slate-400 cursor-not-allowed"
+                          ? "bg-slate-900 hover:bg-black text-white shadow-lg shadow-slate-200"
+                          : "bg-slate-100 text-slate-400 cursor-not-allowed"
                         }`}
                     >
                       {live && <Radio size={16} />}
-                      {live ? "Join Session" : ended ? "Ended" : "Starting Soon"}
+                      {live
+                        ? "Join Session"
+                        : ended
+                          ? "Ended"
+                          : "Starting Soon"}
                     </button>
                   </div>
                 </div>
