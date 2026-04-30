@@ -85,15 +85,15 @@ export default function CourseDetails() {
     new window.Razorpay(options).open();
   }
 
-  if (loading) return <div className="py-20 text-center">Loading course...</div>;
-  if (!course) return <div className="py-20 text-center">Course not found!!!.</div>;
+  if (loading) return <div className="py-20 text-center min-w-[100vw] w-full">Loading course...</div>;
+  if (!course) return <div className="py-20 text-center min-w-[100vw] w-full">Course not found!!!.</div>;
 
   return (
-    <div className="min-h-screen bg-gray-50 min-w-[100vw]">
+    <div className="min-h-screen bg-gray-50 min-w-[100vw] w-full">
 
       {/* ===== HERO ===== */}
       <div
-        className="text-white py-16 md:px-16 lg:px-16"
+        className="text-white py-16 md:px-16 lg:px-16 min-w-[100vw] w-full"
         style={{ backgroundColor: primary }}
       >
         <div className="max-w-7xl mx-auto px-6 grid md:grid-cols-2 gap-12 items-center">

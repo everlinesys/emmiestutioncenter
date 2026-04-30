@@ -7,7 +7,7 @@ export default function About() {
   const whatsappUrl = "https://wa.me/9497340940";
 
   return (
-    <div className="bg-slate-50 text-slate-900 min-h-screen font-sans py-0 my-0">
+    <div className="bg-slate-50 text-slate-900 min-h-screen  py-0 my-0">
       
       {/* HERO SECTION */}
       <section className="relative bg-gradient-to-br from-slate-900 via-blue-950 to-slate-900 text-white py-24 px-6 overflow-hidden  px-5 md:px-16">
@@ -134,8 +134,8 @@ export default function About() {
         {/* FOOTER / SOCIALS */}
         <div className="mt-32 pt-12 border-t border-slate-200 flex flex-col md:flex-row justify-between items-center gap-8">
           <div>
-            <h4 className="text-2xl font-bold text-slate-900">TutorX Academy</h4>
-            <p className="text-slate-500">Transforming potential into performance.</p>
+            <h4 className="text-2xl font-bold text-slate-900">TutorX Learning Academy</h4>
+            <p className="text-slate-500">Where Talent meet Excellence.</p>
           </div>
           
           <div className="flex gap-4">

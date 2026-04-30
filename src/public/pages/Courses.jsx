@@ -57,14 +57,14 @@ export default function Courses() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex justify-center items-center bg-gray-50">
+      <div className="min-h-screen flex justify-center items-center bg-gray-50 min-w-[100vw] w-full">
         <div className="text-sm opacity-60">Loading...</div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 min-w-[100vw] w-full">
 
       {/* HEADER */}
       <header

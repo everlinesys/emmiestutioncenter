@@ -2,17 +2,17 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import api from "../../shared/api";
 import { useBranding } from "../../shared/hooks/useBranding";
-import { 
-  Plus, 
-  MoreVertical, 
-  Users, 
-  IndianRupee, 
-  Trash2, 
-  Edit3, 
-  Settings, 
-  X, 
-  Calendar, 
-  ClipboardCheck 
+import {
+  Plus,
+  MoreVertical,
+  Users,
+  IndianRupee,
+  Trash2,
+  Edit3,
+  Settings,
+  X,
+  Calendar,
+  ClipboardCheck
 } from "lucide-react";
 
 export default function Courses() {
@@ -20,11 +20,11 @@ export default function Courses() {
   const [groups, setGroups] = useState([]);
   const [active, setActive] = useState(null);
   const [loading, setLoading] = useState(true);
-  
+
   const [showGroupModal, setShowGroupModal] = useState(false);
   const [groupName, setGroupName] = useState("");
   const [selectedCourses, setSelectedCourses] = useState([]);
-
+  const [upcomingLives, setUpcomingLives] = useState([]);
   const [showLiveModal, setShowLiveModal] = useState(false);
   const [liveForm, setLiveForm] = useState({
     title: "",
@@ -32,7 +32,7 @@ export default function Courses() {
     startTime: "",
     endTime: "",
   });
-  
+
   const [nextLive, setNextLive] = useState(null);
   const [now, setNow] = useState(new Date());
 
@@ -61,6 +61,7 @@ export default function Courses() {
     load();
   }, []);
 
+
   useEffect(() => {
     const interval = setInterval(() => {
       setNow(new Date());
@@ -71,28 +72,34 @@ export default function Courses() {
   /* ================= LIVE CLASS LOGIC ================= */
   useEffect(() => {
     if (!active) return;
+
     async function loadLive() {
       try {
         const res = await api.get(`/live-classes?courseId=${active.id}`);
         const nowTime = new Date();
+
         const upcoming = res.data
           .filter(c => new Date(c.startTime) > nowTime)
-          .sort((a, b) => new Date(a.startTime) - new Date(b.startTime))[0];
-        setNextLive(upcoming || null);
+          .sort((a, b) => new Date(a.startTime) - new Date(b.startTime));
+
+        setUpcomingLives(upcoming);
       } catch (err) {
         console.error(err);
       }
     }
+
     loadLive();
   }, [active]);
 
-  function getCountdown() {
-    if (!nextLive) return null;
-    const diff = new Date(nextLive.startTime) - now;
+  function getCountdown(startTime) {
+    const diff = new Date(startTime) - now;
+
     if (diff <= 0) return "Starting...";
+
     const h = Math.floor(diff / (1000 * 60 * 60));
     const m = Math.floor((diff / (1000 * 60)) % 60);
     const s = Math.floor((diff / 1000) % 60);
+
     return `${h}h ${m}m ${s}s`;
   }
 
@@ -138,14 +145,15 @@ export default function Courses() {
       await api.post("/live-classes", {
         title: liveForm.title,
         meetLink: `https://meet.google.com/${meetId}`,
-        startTime: liveForm.startTime,
-        endTime: liveForm.endTime,
+        startTime: start.toISOString(),   // ✅ FIX
+        endTime: end.toISOString(),       // ✅ FIX
         courseId: active.id,
       });
 
       setShowLiveModal(false);
       setLiveForm({ title: "", meetInput: "", startTime: "", endTime: "" });
       alert("Live class scheduled");
+      load();
     } catch (err) {
       alert("Failed to create live class");
     }
@@ -201,6 +209,32 @@ export default function Courses() {
     load();
   };
 
+  async function deleteLiveClass(id) {
+    if (!window.confirm("Delete this live class?")) return;
+
+    try {
+      await api.delete(`/live-classes/${id}`);
+      alert("Live class deleted");
+
+      // refresh live data
+      setNextLive(null);
+
+      // reload again
+      if (active) {
+        const res = await api.get(`/live-classes?courseId=${active.id}`);
+        const nowTime = new Date();
+        const upcoming = res.data
+          .filter(c => new Date(c.startTime) > nowTime)
+          .sort((a, b) => new Date(a.startTime) - new Date(b.startTime))[0];
+
+        setNextLive(upcoming || null);
+      }
+
+    } catch (err) {
+      alert("Failed to delete live class");
+    }
+  }
+
   const openTestModal = () => {
     if (!active) return;
     navigate(`/admin/tests`);
@@ -210,7 +244,7 @@ export default function Courses() {
 
   return (
     <div className="min-h-screen p-6 lg:p-12 max-w-[1400px] mx-auto space-y-10">
-      
+
       {/* HEADER */}
       <header className="flex flex-col md:flex-row md:items-end justify-between gap-4">
         <div>
@@ -346,23 +380,56 @@ export default function Courses() {
                   <p className="text-lg font-bold text-slate-900 mt-1">{active.studentsCount ?? 0} Students</p>
                 </div>
               </div>
-              
+
               <div className="flex items-center gap-2">
                 <span className={`px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider text-white ${active.isLive ? 'bg-green-500' : 'bg-red-500'}`}>
                   {active.isLive ? 'Live' : 'Not Live'}
                 </span>
               </div>
 
-              {nextLive && (
-                <div className="p-4 rounded-xl bg-indigo-50 border border-indigo-100 space-y-3">
-                  <p className="text-[10px] uppercase tracking-widest text-indigo-500 font-bold">Next Live Session</p>
-                  <p className="text-sm font-semibold">{new Date(nextLive.startTime).toLocaleString()}</p>
-                  <p className="text-lg font-mono text-indigo-600">⏳ {getCountdown()}</p>
-                  {isLiveNow() && (
-                    <button onClick={() => window.open(nextLive.meetLink, "_blank")} className="w-full bg-red-600 text-white py-2 rounded-lg text-sm font-semibold">
-                      🔴 Join Live Class
-                    </button>
-                  )}
+              {upcomingLives.length > 0 && (
+                <div className="space-y-4">
+
+                  <p className="text-[10px] uppercase tracking-widest text-indigo-500 font-bold">
+                    Upcoming Live Sessions
+                  </p>
+
+                  <div className="space-y-3 max-h-[300px] overflow-y-auto pr-1">
+                    {upcomingLives.map((live, index) => (
+                      <div
+                        key={live.id}
+                        className={`relative p-4 rounded-xl border space-y-2 ${index === 0
+                          ? "bg-indigo-50 border-indigo-200"
+                          : "bg-white border-slate-200"
+                          }`}
+                      >
+
+                        {/* 🗑 Delete button */}
+                        <button
+                          onClick={() => deleteLiveClass(live.id)}
+                          className="absolute top-2 right-2 p-1.5 rounded-md bg-red-500 text-white hover:bg-red-600 transition"
+                        >
+                          <Trash2 size={12} />
+                        </button>
+
+                        {/* Title */}
+                        <p className="text-sm font-semibold text-slate-900">
+                          {live.title}
+                        </p>
+
+                        {/* Time */}
+                        <p className="text-xs text-slate-500">
+                          {new Date(live.startTime).toLocaleString()}
+                        </p>
+
+                        {/* Countdown */}
+                        <p className="text-sm font-mono text-indigo-600">
+                          ⏳ {getCountdown(live.startTime)}
+                        </p>
+
+                      </div>
+                    ))}
+                  </div>
                 </div>
               )}
 

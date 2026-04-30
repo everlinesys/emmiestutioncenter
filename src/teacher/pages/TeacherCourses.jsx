@@ -9,7 +9,7 @@ export default function TeacherCourses() {
   const [active, setActive] = useState(null);
   const navigate = useNavigate();
   const brand = useBranding();
-
+  const [lives, setLives] = useState([]);
   const [showLiveModal, setShowLiveModal] = useState(false);
 
   const [liveForm, setLiveForm] = useState({
@@ -130,7 +130,31 @@ export default function TeacherCourses() {
       alert("Failed to create live class");
     }
   }
+  useEffect(() => {
+    if (!active) return;
 
+    async function loadLives() {
+      try {
+        const res = await api.get(`/live-classes?courseId=${active.id}`);
+        setLives(res.data || []);
+      } catch (err) {
+        console.error(err);
+      }
+    }
+
+    loadLives();
+  }, [active]); async function deleteLive(id) {
+    if (!window.confirm("Delete this live class?")) return;
+
+    try {
+      await api.delete(`/live-classes/${id}`);
+
+      // update UI instantly
+      setLives((prev) => prev.filter((l) => l.id !== id));
+    } catch (err) {
+      alert("Failed to delete");
+    }
+  }
   return (
     <div className="min-h-screen p-6 md:p-10 bg-white space-y-10">
 
@@ -187,7 +211,63 @@ export default function TeacherCourses() {
             </button>
 
             <h3 className="text-xl font-bold">{active.title}</h3>
+            {lives.length > 0 && (
+              <div className="space-y-3 mt-4 max-h-[250px] overflow-y-auto">
 
+                <p className="text-[10px] uppercase text-slate-400 font-bold tracking-widest">
+                  Live Sessions
+                </p>
+
+                {lives.map((live) => {
+                  const now = new Date();
+                  const start = new Date(live.startTime);
+                  const end = new Date(live.endTime);
+
+                  const isLive = now >= start && now <= end;
+                  const isPast = now > end;
+
+                  return (
+                    <div
+                      key={live.id}
+                      className={`relative p-3 rounded-lg border text-sm ${isLive
+                          ? "bg-red-50 border-red-200"
+                          : isPast
+                            ? "bg-slate-50 text-slate-400"
+                            : "bg-white"
+                        }`}
+                    >
+
+                      {/* delete */}
+                      <button
+                        onClick={() => deleteLive(live.id)}
+                        disabled={isPast}
+                        className="absolute top-2 right-2 text-red-500 hover:text-red-700"
+                      >
+                        <X size={14} />
+                      </button>
+
+                      <p className="font-semibold">{live.title}</p>
+
+                      <p className="text-xs">
+                        {new Date(live.startTime).toLocaleString()}
+                      </p>
+
+                      {isLive && (
+                        <span className="text-red-500 text-xs font-bold">
+                          🔴 Live Now
+                        </span>
+                      )}
+
+                      {isPast && (
+                        <span className="text-slate-400 text-xs">
+                          Ended
+                        </span>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            )}
             <div className="grid grid-cols-2 gap-3">
               <button
                 onClick={() =>
@@ -292,8 +372,8 @@ export default function TeacherCourses() {
                     });
                   }}
                   className={`flex-1 py-2 rounded-xl border ${liveForm.duration === min
-                      ? "bg-indigo-600 text-white"
-                      : ""
+                    ? "bg-indigo-600 text-white"
+                    : ""
                     }`}
                 >
                   {min === 30 ? "30 min" : "1 hour"}

@@ -63,10 +63,9 @@ export default function TeacherSidebar({ open, onClose }) {
                 `
                 group flex items-center gap-3 px-4 py-3 rounded-xl text-sm
                 transition-all duration-200
-                ${
-                  isActive
-                    ? "bg-white text-slate-900 shadow-lg"
-                    : "text-white/70 hover:bg-white/10 hover:text-white"
+                ${isActive
+                  ? "bg-white text-slate-900 shadow-lg"
+                  : "text-white/70 hover:bg-white/10 hover:text-white"
                 }
               `
               }
@@ -82,7 +81,7 @@ export default function TeacherSidebar({ open, onClose }) {
         {/* BOTTOM PROFILE / ACTION */}
         <div className="p-4 border-t border-white/10">
           <button
-            onClick={() => navigate("/")}
+            onClick={() => { localStorage.removeItem("token"); localStorage.removeItem("user"); navigate("/") }}
             className="w-full text-sm bg-white/10 hover:bg-white/20 text-white py-2 rounded-lg transition"
           >
             Logout

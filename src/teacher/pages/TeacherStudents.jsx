@@ -10,7 +10,7 @@ export default function TeacherStudents() {
   const [selected, setSelected] = useState({});
   const [groupName, setGroupName] = useState("");
   const [groups, setGroups] = useState([]);
-
+  const [groupLives, setGroupLives] = useState({});
   const [liveData, setLiveData] = useState({
     title: "",
     meetLink: "",
@@ -22,6 +22,7 @@ export default function TeacherStudents() {
   useEffect(() => {
     load();
     loadGroups();
+    loadGroupLives();
   }, []);
 
   /* ================= LOAD ================= */
@@ -37,6 +38,27 @@ export default function TeacherStudents() {
       setLoading(false);
     }
   }
+  async function loadGroupLives() {
+    try {
+      const res = await api.get("/live-classes");
+
+      const grouped = {};
+
+      res.data.forEach((lc) => {
+        if (!lc.groupId) return;
+
+        if (!grouped[lc.groupId]) {
+          grouped[lc.groupId] = [];
+        }
+
+        grouped[lc.groupId].push(lc);
+      });
+
+      setGroupLives(grouped);
+    } catch (err) {
+      console.error(err);
+    }
+  }
 
   async function loadGroups() {
     try {
@@ -46,7 +68,20 @@ export default function TeacherStudents() {
       console.log("Failed to load groups");
     }
   }
+  async function deleteLive(id, groupId) {
+    if (!window.confirm("Delete this live?")) return;
 
+    try {
+      await api.delete(`/live-classes/${id}`);
+
+      setGroupLives((prev) => ({
+        ...prev,
+        [groupId]: prev[groupId]?.filter((l) => l.id !== id),
+      }));
+    } catch {
+      alert("Failed to delete live");
+    }
+  }
   /* ================= GROUP STUDENTS ================= */
 
   const grouped = Object.values(
@@ -126,16 +161,23 @@ export default function TeacherStudents() {
     }
 
     try {
+      const start = new Date(liveData.startTime);
+      const end = new Date(liveData.endTime);
+
+      if (isNaN(start.getTime()) || isNaN(end.getTime())) {
+        return alert("Invalid date");
+      }
+
       await api.post("/live-classes", {
         title: liveData.title,
         meetLink: liveData.meetLink,
-        startTime: liveData.startTime,
-        endTime: liveData.endTime,
+        startTime: start.toISOString(),   // ✅ FIX
+        endTime: end.toISOString(),       // ✅ FIX
         groupId: Number(liveData.groupId),
       });
 
       alert("Live scheduled");
-
+      await loadGroupLives();
       setLiveData({
         title: "",
         meetLink: "",
@@ -168,6 +210,7 @@ export default function TeacherStudents() {
         <div className="bg-slate-900 p-5 rounded-xl border border-slate-800 space-y-4">
           <h3 className="font-semibold text-white">Create Group</h3>
 
+          {/* Group Name */}
           <input
             placeholder="Group Name"
             value={groupName}
@@ -175,13 +218,45 @@ export default function TeacherStudents() {
             className="w-full bg-slate-800 border border-slate-700 px-3 py-2 rounded"
           />
 
+          {/* Search inside group */}
+          <input
+            placeholder="Search students..."
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            className="w-full bg-slate-800 border border-slate-700 px-3 py-2 rounded text-sm"
+          />
+
+          {/* Student list */}
+          <div className="max-h-[250px] overflow-y-auto space-y-2 border border-slate-700 rounded p-2">
+            {filtered.map((u) => (
+              <div
+                key={u.id}
+                className="flex items-center justify-between bg-slate-800 px-3 py-2 rounded"
+              >
+                <div className="flex items-center gap-2">
+                  <input
+                    type="checkbox"
+                    checked={!!selected[u.id]}
+                    onChange={() => toggleSelect(u.id)}
+                  />
+                  <div>
+                    <p className="text-sm text-white">{u.name}</p>
+                    <p className="text-xs text-slate-400">{u.email}</p>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Selected count */}
           <p className="text-xs text-slate-400">
-            Selected Students: {selectedIds.length}
+            Selected: {selectedIds.length}
           </p>
 
+          {/* Action */}
           <button
             onClick={createGroup}
-            className="bg-indigo-600 px-4 py-2 rounded text-sm"
+            className="bg-indigo-600 px-4 py-2 rounded text-sm w-full"
           >
             Create Group
           </button>
@@ -249,49 +324,86 @@ export default function TeacherStudents() {
             Schedule Live
           </button>
         </div>
+        <div className="space-y-6">
+          <h3 className="text-white font-semibold">Group Live Sessions</h3>
 
-        {/* SEARCH */}
-        <input
-          className="w-full bg-slate-900 border border-slate-800 px-4 py-2 rounded-xl"
-          placeholder="Search students..."
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-        />
+          {groups.map((g) => {
+            const lives = groupLives[g.id] || [];
 
-        {/* STUDENTS */}
-        <div className="space-y-4">
-          {loading && <p>Loading...</p>}
-
-          {filtered.map((u) => (
-            <div
-              key={u.id}
-              className="bg-slate-900 border border-slate-800 rounded-xl"
-            >
-              <div className="flex items-center justify-between p-4">
-                <div className="flex items-center gap-3">
-                  <input
-                    type="checkbox"
-                    checked={!!selected[u.id]}
-                    onChange={() => toggleSelect(u.id)}
-                  />
-
-                  <div>
-                    <div className="font-bold text-white">
-                      {u.name}
-                    </div>
-                    <div className="text-xs text-slate-400">
-                      {u.email}
-                    </div>
-                  </div>
+            return (
+              <div
+                key={g.id}
+                className="bg-slate-900 border border-slate-800 rounded-xl p-4 space-y-3"
+              >
+                <div className="flex justify-between items-center">
+                  <h4 className="text-white font-semibold">
+                    {g.name}
+                  </h4>
+                  <span className="text-xs text-slate-400">
+                    {lives.length} sessions
+                  </span>
                 </div>
 
-                <button onClick={() => toggle(u.id)}>
-                  {expanded[u.id] ? "▲" : "▼"}
-                </button>
+                {lives.length === 0 ? (
+                  <p className="text-xs text-slate-500">No live sessions</p>
+                ) : (
+                  <div className="space-y-2 max-h-[200px] overflow-y-auto">
+                    {lives.map((live) => {
+                      const now = new Date();
+                      const start = new Date(live.startTime);
+                      const end = new Date(live.endTime);
+
+                      const isLive = now >= start && now <= end;
+                      const isPast = now > end;
+
+                      return (
+                        <div
+                          key={live.id}
+                          className={`relative p-3 rounded-lg text-sm border ${isLive
+                            ? "bg-red-50 border-red-200 text-black"
+                            : isPast
+                              ? "bg-slate-800 text-slate-400"
+                              : "bg-white text-black"
+                            }`}
+                        >
+
+                          {/* delete */}
+                          <button
+                            onClick={() => deleteLive(live.id, g.id)}
+                            className="absolute top-2 right-2 text-red-500 hover:text-red-700"
+                          >
+                            ✕
+                          </button>
+
+                          <p className="font-semibold">{live.title}</p>
+
+                          <p className="text-xs">
+                            {new Date(live.startTime).toLocaleString()}
+                          </p>
+
+                          {isLive && (
+                            <span className="text-red-500 text-xs font-bold">
+                              🔴 Live Now
+                            </span>
+                          )}
+
+                          {isPast && (
+                            <span className="text-xs">Ended</span>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
+        {/* SEARCH */}
+
+
+        {/* STUDENTS */}
+
 
       </div>
     </div>

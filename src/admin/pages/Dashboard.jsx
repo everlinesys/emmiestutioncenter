@@ -65,6 +65,18 @@ export default function AdminDashboard() {
     return () => clearInterval(interval);
   }, []);
 
+  const liveNow = liveClasses.filter(lc =>
+    isLive(lc.startTime, lc.endTime)
+  );
+
+  const upcomingLives = liveClasses.filter(lc =>
+    new Date(lc.startTime) > now
+  );
+
+  const endedLives = liveClasses.filter(lc =>
+    new Date(lc.endTime) < now
+  );
+
   if (!stats)
     return (
       <div className="flex h-screen items-center justify-center text-[13px] text-slate-400 font-medium tracking-tight animate-pulse">
@@ -118,51 +130,69 @@ export default function AdminDashboard() {
             Live Sessions
           </h3>
 
-          <div className="grid md:grid-cols-2 gap-4">
+          <div className="flex flex-col md:flex-row gap-6">
 
-            {liveClasses.map((lc) => {
-              const live = isLive(lc.startTime, lc.endTime);
+            {liveNow.length > 0 && (
+              <div className="space-y-3">
+                <h3 className="text-[11px] font-bold text-red-500 uppercase tracking-[0.2em]">
+                  🔴 Live Now
+                </h3>
 
-              return (
-                <div
-                  key={lc.id}
-                  className="p-5 rounded-2xl border bg-white shadow-sm space-y-3"
-                >
+                <div className="grid md:grid-cols-2 gap-4">
+                  {liveNow.map((lc) => (
+                    <div key={lc.id} className="p-5 rounded-2xl bg-red-50 border border-red-200 space-y-3">
+                      <h4 className="font-semibold">{lc.title}</h4>
+                      <p className="text-sm">{new Date(lc.startTime)}</p>
 
-                  {/* Course Name */}
-                  <p className="text-[10px] uppercase text-slate-400 font-bold tracking-widest">
-                    {lc.course?.title || "Course"}
-                  </p>
-
-                  {/* Title */}
-                  <h4 className="font-semibold text-slate-900">
-                    {lc.title}
-                  </h4>
-
-                  {/* Time */}
-                  <p className="text-sm text-slate-500">
-                    {new Date(lc.startTime).toLocaleString()}
-                  </p>
-
-                  {/* Countdown */}
-                  <p className={`text-lg font-mono ${live ? "text-red-500" : "text-indigo-600"
-                    }`}>
-                    {live ? "🔴 Live Now" : `⏳ ${getCountdown(lc.startTime)}`}
-                  </p>
-
-                  {/* JOIN */}
-                  {live && (
-                    <button
-                      onClick={() => window.open(lc.meetLink, "_blank")}
-                      className="w-full bg-red-600 hover:bg-red-700 text-white py-2 rounded-lg text-sm font-semibold"
-                    >
-                      🔴 Join Class
-                    </button>
-                  )}
-
+                      <button
+                        onClick={() => window.open(lc.meetLink, "_blank")}
+                        className="w-full bg-red-600 text-white py-2 rounded-lg text-sm font-semibold"
+                      >
+                        🔴 Join Class
+                      </button>
+                    </div>
+                  ))}
                 </div>
-              );
-            })}
+              </div>
+            )}{upcomingLives.length > 0 && (
+              <div className="space-y-3">
+                <h3 className="text-[11px] font-bold text-indigo-500 uppercase tracking-[0.2em]">
+                  Upcoming Sessions
+                </h3>
+
+                <div className="grid md:grid-cols-2 gap-4">
+                  {upcomingLives.map((lc) => (
+                    <div key={lc.id} className="p-5 rounded-2xl border bg-white space-y-3">
+                      <h4 className="font-semibold">{lc.title}</h4>
+                      <p className="text-sm">{new Date(lc.startTime).toLocaleString()}</p>
+                      <p className="text-lg font-mono text-indigo-600">
+                        ⏳ {getCountdown(lc.startTime)}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}{endedLives.length > 0 && (
+              <div className="space-y-3">
+                <h3 className="text-[11px] font-bold text-slate-400 uppercase tracking-[0.2em]">
+                  Past Sessions
+                </h3>
+
+                <div className="space-y-2">
+                  {endedLives.slice(0, 5).map((lc) => (
+                    <div
+                      key={lc.id}
+                      className="flex justify-between items-center text-sm text-slate-400 bg-slate-50 px-4 py-2 rounded-lg"
+                    >
+                      <span className="truncate">{lc.title}</span>
+                      <span className="text-[11px]">
+                        {new Date(lc.startTime).toLocaleDateString()}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
 
           </div>
         </div>

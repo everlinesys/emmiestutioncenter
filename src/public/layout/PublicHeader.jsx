@@ -63,7 +63,7 @@ export default function PublicHeader() {
               <Link
                 to="/register"
                 className={`${theme.button.primary} px-4 py-2 bg-[#F59E0B] ${theme.shape.buttonRadius}`}
-                style={{ background: brand.colors?.primary || "#F59E0B", color: brand.colors?.accent || "#000000" }}
+                style={{ background: brand.colors?.primary || "#F59E0B", color: "#ffffff" }}
               >
                 Register
               </Link>
