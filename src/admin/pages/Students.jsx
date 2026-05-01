@@ -74,7 +74,7 @@ export default function Students() {
       "This will generate a new random password and email it to the user. Continue?",
       async () => {
         try {
-          await api.post(`/students/${userId}/reset-password`);
+          await api.post(`/admin/students/${userId}/reset-password`);
           setUiModal({ show: false });
           showAlert("Success", "New password has been sent.");
         } catch (err) {
