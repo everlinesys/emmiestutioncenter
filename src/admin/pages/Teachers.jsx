@@ -474,7 +474,7 @@ export default function Teachers() {
                 </div>
                 <div className="pt-4 border-t border-white/10 flex justify-between items-end">
                   <span className="text-slate-400 font-bold uppercase text-[10px] tracking-[2px]">Net Payable</span>
-                  <span className="text-3xl font-black text-emerald-400">₹{walletData.payable}</span>
+                  <span className="text-3xl font-black text-emerald-400">₹{walletData.payable.toFixed(2)}</span>
                 </div>
               </div>
               {/* HISTORY */}
@@ -509,7 +509,7 @@ export default function Teachers() {
                       </div>
 
                       <div className="text-sm font-bold text-emerald-400">
-                        ₹{h.amount}
+                        ₹{h.amount.toFixed(2)} {h.status === "pending" ? "(Pending)" : ""}
                       </div>
                     </div>
                   ))}
