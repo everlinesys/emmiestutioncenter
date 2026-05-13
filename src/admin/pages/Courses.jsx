@@ -29,8 +29,10 @@ export default function Courses() {
   const [liveForm, setLiveForm] = useState({
     title: "",
     meetInput: "",
+    date: new Date().toISOString().split("T")[0],
     startTime: "",
     endTime: "",
+    duration: 45,
   });
 
   const [nextLive, setNextLive] = useState(null);
@@ -135,8 +137,13 @@ export default function Courses() {
       const meetId = extractMeetId(liveForm.meetInput);
       if (!meetId) return alert("Enter valid Google Meet ID");
 
-      const start = new Date(liveForm.startTime);
-      const end = new Date(liveForm.endTime);
+      const start = new Date(
+        `${liveForm.date}T${liveForm.startTime}`
+      );
+
+      const end = new Date(
+        `${liveForm.date}T${liveForm.endTime}`
+      );
       const diffMinutes = (end - start) / (1000 * 60);
 
       if (diffMinutes <= 0) return alert("End time must be after start time");
@@ -155,6 +162,7 @@ export default function Courses() {
       alert("Live class scheduled");
       load();
     } catch (err) {
+      console.error(err);
       alert("Failed to create live class");
     }
   }
@@ -487,24 +495,216 @@ export default function Courses() {
       {/* SCHEDULE LIVE MODAL */}
       {showLiveModal && (
         <div className="fixed inset-0 z-[130] flex items-center justify-center p-4">
-          <div className="absolute inset-0 bg-black/50" onClick={() => setShowLiveModal(false)} />
-          <div className="relative bg-white w-full max-w-md rounded-2xl p-6 space-y-5 shadow-xl">
-            <h3 className="text-lg font-bold">Schedule Live Class</h3>
-            <div className="space-y-4">
-              <input placeholder="Session Title" className="w-full border px-3 py-2 rounded-lg text-sm" value={liveForm.title} onChange={(e) => setLiveForm({ ...liveForm, title: e.target.value })} />
-              <input placeholder="Google Meet ID or Link" className="w-full border px-3 py-2 rounded-lg text-sm" value={liveForm.meetInput} onChange={(e) => setLiveForm({ ...liveForm, meetInput: e.target.value })} />
+          <div
+            className="absolute inset-0 bg-black/50 backdrop-blur-sm"
+            onClick={() => setShowLiveModal(false)}
+          />
+
+          <div className="relative bg-white w-full max-w-md rounded-3xl p-6 space-y-5 shadow-2xl border border-slate-100">
+
+            <div className="flex items-center justify-between">
               <div>
-                <label className="text-[10px] text-slate-500 ml-1">Start Time</label>
-                <input type="datetime-local" className="w-full border px-3 py-2 rounded-lg text-sm" value={liveForm.startTime} onChange={(e) => setLiveForm({ ...liveForm, startTime: e.target.value })} />
+                <h3 className="text-xl font-bold text-slate-800">
+                  Schedule Live Class
+                </h3>
+                <p className="text-xs text-slate-500">
+                  Create a live session for students
+                </p>
               </div>
-              <div>
-                <label className="text-[10px] text-slate-500 ml-1">End Time</label>
-                <input type="datetime-local" className="w-full border px-3 py-2 rounded-lg text-sm" value={liveForm.endTime} onChange={(e) => setLiveForm({ ...liveForm, endTime: e.target.value })} />
-              </div>
+
+              <button
+                onClick={() => setShowLiveModal(false)}
+                className="h-8 w-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-600"
+              >
+                ✕
+              </button>
             </div>
-            <div className="flex gap-2">
-              <button onClick={createLiveClass} className="flex-1 bg-green-600 text-white py-2 rounded-lg text-sm font-bold">Schedule</button>
-              <button onClick={() => setShowLiveModal(false)} className="flex-1 bg-slate-200 py-2 rounded-lg text-sm">Cancel</button>
+
+            <div className="space-y-4">
+
+              <div>
+                <label className="text-xs font-medium text-slate-600 ml-1">
+                  Session Title
+                </label>
+                <input
+                  placeholder="Physics Revision Class"
+                  className="w-full border border-slate-200 focus:border-green-500 focus:ring-2 focus:ring-green-100 outline-none px-4 py-3 rounded-xl text-sm transition"
+                  value={liveForm.title}
+                  onChange={(e) =>
+                    setLiveForm({ ...liveForm, title: e.target.value })
+                  }
+                />
+              </div>
+
+              <div>
+                <label className="text-xs font-medium text-slate-600 ml-1">
+                  Google Meet Link / ID
+                </label>
+                <input
+                  placeholder="https://meet.google.com/..."
+                  className="w-full border border-slate-200 focus:border-green-500 focus:ring-2 focus:ring-green-100 outline-none px-4 py-3 rounded-xl text-sm transition"
+                  value={liveForm.meetInput}
+                  onChange={(e) =>
+                    setLiveForm({ ...liveForm, meetInput: e.target.value })
+                  }
+                />
+              </div>
+
+              {/* START DATE */}
+              {/* START DATE */}
+              <div>
+                <label className="text-xs font-medium text-slate-600 ml-1">
+                  Select Date
+                </label>
+
+                <input
+                  type="date"
+                  className="
+      w-full border border-slate-200
+      focus:border-green-500
+      focus:ring-2 focus:ring-green-100
+      outline-none px-4 py-3 rounded-xl
+      text-sm transition bg-white text-slate-700
+      [color-scheme:light]
+    "
+                  value={
+                    liveForm.date ||
+                    new Date().toISOString().split("T")[0]
+                  }
+                  min={new Date().toISOString().split("T")[0]}
+                  onChange={(e) =>
+                    setLiveForm({
+                      ...liveForm,
+                      date: e.target.value,
+                    })
+                  }
+                />
+              </div>
+
+              {/* START TIME */}
+              {/* START TIME */}
+              <div>
+                <label className="text-xs font-medium text-slate-600 ml-1">
+                  Start Time
+                </label>
+
+                <select
+                  className="
+      w-full border border-slate-200
+      focus:border-green-500
+      focus:ring-2 focus:ring-green-100
+      outline-none px-4 py-3 rounded-xl
+      text-sm transition bg-white text-slate-700
+      appearance-none
+    "
+                  value={liveForm.startTime || ""}
+                  onChange={(e) => {
+                    const startTime = e.target.value;
+
+                    let endTime = "";
+
+                    if (startTime && liveForm.duration) {
+                      const [h, m] = startTime.split(":").map(Number);
+
+                      const start = new Date();
+                      start.setHours(h);
+                      start.setMinutes(m);
+
+                      start.setMinutes(
+                        start.getMinutes() + Number(liveForm.duration)
+                      );
+
+                      endTime = start.toTimeString().slice(0, 5);
+                    }
+
+                    setLiveForm({
+                      ...liveForm,
+                      startTime,
+                      endTime,
+                    });
+                  }}
+                >
+                  <option value="">Select Time</option>
+
+                  {Array.from({ length: 48 }).map((_, i) => {
+                    const hour = String(Math.floor(i / 2)).padStart(2, "0");
+                    const minute = i % 2 === 0 ? "00" : "30";
+
+                    return (
+                      <option
+                        key={`${hour}:${minute}`}
+                        value={`${hour}:${minute}`}
+                      >
+                        {`${hour}:${minute}`}
+                      </option>
+                    );
+                  })}
+                </select>
+              </div>
+
+              {/* DURATION */}
+              <div>
+                <label className="text-xs font-medium text-slate-600 ml-1">
+                  Duration
+                </label>
+
+                <div className="grid grid-cols-3 gap-2">
+                  {[30, 45, 60].map((mins) => (
+                    <button
+                      key={mins}
+                      type="button"
+                      onClick={() => {
+                        let endTime = "";
+
+                        if (liveForm.startTime) {
+                          const [h, m] = liveForm.startTime
+                            .split(":")
+                            .map(Number);
+
+                          const start = new Date();
+                          start.setHours(h);
+                          start.setMinutes(m);
+
+                          start.setMinutes(start.getMinutes() + mins);
+
+                          endTime = start.toTimeString().slice(0, 5);
+                        }
+
+                        setLiveForm({
+                          ...liveForm,
+                          duration: mins,
+                          endTime,
+                        });
+                      }}
+                      className={`py-3 rounded-xl text-sm font-semibold border transition ${liveForm.duration === mins
+                        ? "bg-green-600 text-white border-green-600"
+                        : "bg-white border-slate-200 hover:border-green-400"
+                        }`}
+                    >
+                      {mins} min
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* END TIME DISPLAY */}
+
+            </div>
+
+            <div className="flex gap-3 pt-2">
+              <button
+                onClick={createLiveClass}
+                className="flex-1 bg-green-600 hover:bg-green-700 text-white py-3 rounded-xl text-sm font-bold transition shadow-lg shadow-green-200"
+              >
+                Schedule Class
+              </button>
+
+              <button
+                onClick={() => setShowLiveModal(false)}
+                className="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 py-3 rounded-xl text-sm font-semibold transition"
+              >
+                Cancel
+              </button>
             </div>
           </div>
         </div>

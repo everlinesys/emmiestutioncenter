@@ -12,11 +12,13 @@ export default function TeacherStudents() {
   const [groups, setGroups] = useState([]);
   const [groupLives, setGroupLives] = useState({});
   const [liveData, setLiveData] = useState({
+    groupId: "",
     title: "",
     meetLink: "",
+    date: new Date().toISOString().split("T")[0],
     startTime: "",
     endTime: "",
-    groupId: "",
+    duration: 45,
   });
 
   useEffect(() => {
@@ -161,9 +163,13 @@ export default function TeacherStudents() {
     }
 
     try {
-      const start = new Date(liveData.startTime);
-      const end = new Date(liveData.endTime);
+      const start = new Date(
+        `${liveData.date}T${liveData.startTime}`
+      );
 
+      const end = new Date(
+        `${liveData.date}T${liveData.endTime}`
+      );
       if (isNaN(start.getTime()) || isNaN(end.getTime())) {
         return alert("Invalid date");
       }
@@ -271,9 +277,10 @@ export default function TeacherStudents() {
             onChange={(e) =>
               setLiveData({ ...liveData, groupId: e.target.value })
             }
-            className="w-full bg-slate-800 border border-slate-700 px-3 py-2 rounded"
+            className="w-full bg-slate-800 border border-slate-700 px-3 py-3 rounded-xl text-white"
           >
             <option value="">Select Group</option>
+
             {groups.map((g) => (
               <option key={g.id} value={g.id}>
                 {g.name} ({g.membersCount || 0})
@@ -287,7 +294,7 @@ export default function TeacherStudents() {
             onChange={(e) =>
               setLiveData({ ...liveData, title: e.target.value })
             }
-            className="w-full bg-slate-800 border border-slate-700 px-3 py-2 rounded"
+            className="w-full bg-slate-800 border border-slate-700 px-3 py-3 rounded-xl text-white placeholder:text-slate-400"
           />
 
           <input
@@ -296,30 +303,148 @@ export default function TeacherStudents() {
             onChange={(e) =>
               setLiveData({ ...liveData, meetLink: e.target.value })
             }
-            className="w-full bg-slate-800 border border-slate-700 px-3 py-2 rounded"
+            className="w-full bg-slate-800 border border-slate-700 px-3 py-3 rounded-xl text-white placeholder:text-slate-400"
           />
 
-          <input
-            type="datetime-local"
-            value={liveData.startTime}
-            onChange={(e) =>
-              setLiveData({ ...liveData, startTime: e.target.value })
-            }
-            className="w-full bg-slate-800 border border-slate-700 px-3 py-2 rounded"
-          />
+          {/* DATE */}
+          <div className="space-y-1">
+            <label className="text-xs text-slate-400">
+              Select Date
+            </label>
 
-          <input
-            type="datetime-local"
-            value={liveData.endTime}
-            onChange={(e) =>
-              setLiveData({ ...liveData, endTime: e.target.value })
-            }
-            className="w-full bg-slate-800 border border-slate-700 px-3 py-2 rounded"
-          />
+            <input
+              type="date"
+              value={
+                liveData.date ||
+                new Date().toISOString().split("T")[0]
+              }
+              min={new Date().toISOString().split("T")[0]}
+              onChange={(e) =>
+                setLiveData({
+                  ...liveData,
+                  date: e.target.value,
+                })
+              }
+              className="
+        w-full bg-slate-800 border border-slate-700
+        px-3 py-3 rounded-xl text-white
+        [color-scheme:dark]
+      "
+            />
+          </div>
+
+          {/* START TIME */}
+          <div className="space-y-1">
+            <label className="text-xs text-slate-400">
+              Start Time
+            </label>
+
+            <select
+              value={liveData.startTime || ""}
+              onChange={(e) => {
+                const startTime = e.target.value;
+
+                let endTime = "";
+
+                if (startTime && liveData.duration) {
+                  const [h, m] = startTime.split(":").map(Number);
+
+                  const start = new Date();
+                  start.setHours(h);
+                  start.setMinutes(m);
+
+                  start.setMinutes(
+                    start.getMinutes() + Number(liveData.duration)
+                  );
+
+                  endTime = start.toTimeString().slice(0, 5);
+                }
+
+                setLiveData({
+                  ...liveData,
+                  startTime,
+                  endTime,
+                });
+              }}
+              className="w-full bg-slate-800 border border-slate-700 px-3 py-3 rounded-xl text-white"
+            >
+              <option value="">Select Time</option>
+
+              {Array.from({ length: 48 }).map((_, i) => {
+                const hour = String(Math.floor(i / 2)).padStart(2, "0");
+                const minute = i % 2 === 0 ? "00" : "30";
+
+                return (
+                  <option
+                    key={`${hour}:${minute}`}
+                    value={`${hour}:${minute}`}
+                  >
+                    {`${hour}:${minute}`}
+                  </option>
+                );
+              })}
+            </select>
+          </div>
+
+          {/* DURATION */}
+          <div className="space-y-2">
+            <label className="text-xs text-slate-400">
+              Duration
+            </label>
+
+            <div className="grid grid-cols-3 gap-2">
+              {[30, 45, 60].map((mins) => (
+                <button
+                  key={mins}
+                  type="button"
+                  onClick={() => {
+                    let endTime = "";
+
+                    if (liveData.startTime) {
+                      const [h, m] = liveData.startTime
+                        .split(":")
+                        .map(Number);
+
+                      const start = new Date();
+                      start.setHours(h);
+                      start.setMinutes(m);
+
+                      start.setMinutes(start.getMinutes() + mins);
+
+                      endTime = start.toTimeString().slice(0, 5);
+                    }
+
+                    setLiveData({
+                      ...liveData,
+                      duration: mins,
+                      endTime,
+                    });
+                  }}
+                  className={`py-3 rounded-xl text-sm font-semibold border transition ${liveData.duration === mins
+                    ? "bg-green-600 text-white border-green-600"
+                    : "bg-slate-800 border-slate-700 text-slate-300"
+                    }`}
+                >
+                  {mins} min
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* END TIME */}
+          <div className="bg-slate-800 border border-slate-700 rounded-xl px-4 py-3 flex items-center justify-between">
+            <span className="text-sm text-slate-400">
+              End Time
+            </span>
+
+            <span className="text-green-400 font-bold">
+              {liveData.endTime || "--:--"}
+            </span>
+          </div>
 
           <button
             onClick={createLive}
-            className="bg-green-600 px-4 py-2 rounded text-sm"
+            className="w-full bg-green-600 hover:bg-green-700 transition px-4 py-3 rounded-xl text-sm font-semibold text-white"
           >
             Schedule Live
           </button>
