@@ -17,6 +17,9 @@ export default function Teachers() {
   const [assignModal, setAssignModal] = useState(null);
   const [selectedCourse, setSelectedCourse] = useState("");
 
+  const [adjustment, setAdjustment] = useState(0);
+  const [adjustmentNote, setAdjustmentNote] = useState("");
+
   const [uiModal, setUiModal] = useState({
     show: false,
     title: "",
@@ -45,8 +48,16 @@ export default function Teachers() {
   }
 
   async function markPaid(id) {
-    await api.post(`/admin/teachers/${id}/mark-paid`);
+    await api.post(`/admin/teachers/${id}/mark-paid`, {
+      adjustment: Number(adjustment),
+      adjustmentNote,
+    });
+
+    setAdjustment(0);
+    setAdjustmentNote("");
+
     setWalletModal(null);
+
     load();
   }
 
@@ -441,7 +452,7 @@ export default function Teachers() {
 
         {/* WALLET MODAL */}
         {walletModal && walletData && (
-          <div className="fixed pt-20 inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm overflow-y-auto">
+          <div className="fixed pt-100 inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm overflow-y-auto">
             <div className="bg-[#111827] border border-white/10 p-8 rounded-3xl w-full max-w-md shadow-2xl">
               <div className="flex justify-between items-start mb-6">
                 <div>
@@ -513,6 +524,60 @@ export default function Teachers() {
                       </div>
                     </div>
                   ))}
+                </div>
+                <div className="mt-5 space-y-3">
+                  <div>
+                    <label className="text-xs text-slate-400 block mb-1">
+                      Adjustment Amount
+                    </label>
+
+                    <input
+                      type="number"
+                      value={adjustment}
+                      onChange={(e) => setAdjustment(e.target.value)}
+                      placeholder="Bonus or deduction"
+                      className="w-full bg-white/5 border border-white/10 px-4 py-3 rounded-xl outline-none"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="text-xs text-slate-400 block mb-1">
+                      Note
+                    </label>
+
+                    <textarea
+                      value={adjustmentNote}
+                      onChange={(e) => setAdjustmentNote(e.target.value)}
+                      placeholder="Reason for adjustment"
+                      className="w-full bg-white/5 border border-white/10 px-4 py-3 rounded-xl outline-none"
+                      rows={3}
+                    />
+                  </div>
+
+                  <div className="bg-black/20 rounded-xl p-4 border border-white/5">
+                    <div className="flex justify-between text-sm">
+                      <span>Base Amount</span>
+                      <span>₹{walletData.payable.toFixed(2)}</span>
+                    </div>
+
+                    <div className="flex justify-between text-sm mt-2">
+                      <span>Adjustment</span>
+                      <span>
+                        {Number(adjustment) >= 0 ? "+" : ""}
+                        ₹{Number(adjustment).toFixed(2)}
+                      </span>
+                    </div>
+
+                    <div className="flex justify-between mt-4 pt-4 border-t border-white/10 font-bold text-emerald-400">
+                      <span>Final Amount</span>
+                      <span>
+                        ₹
+                        {(
+                          walletData.payable + Number(adjustment || 0)
+                        ).toFixed(2)}
+                      </span>
+                    </div>
+                  </div>
                 </div>
               </div>
               <div className="grid grid-cols-2 gap-3 mt-8">
