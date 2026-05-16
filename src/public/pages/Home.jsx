@@ -18,7 +18,7 @@ export default function Home() {
 
       <FeaturedCoursesStrip />
       {/* <MissionVision /> */}
-      <AboutUs />
+      {/* <AboutUs /> */}
       <Testimonials />
       <Enroll />
       <CTASection />

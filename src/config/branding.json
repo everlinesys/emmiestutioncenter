@@ -1,107 +1,117 @@
 {
   "default": {
-    "siteName": "Tutorx Learning Academy",
-    "tagline": "Strong Foundations. Smarter Learning.",
+    "siteName": "Emmie's Tuition Center",
+    "tagline": "Customized Learning. Better Results.",
 
-    "primaryColor": "#e3ba00",
+    "primaryColor": "#f4c400",
     "theme": "schoolAcademic",
 
     "logo": "/logo.png",
-    "students": "300+",
+    "students": "500+",
 
     "colors": {
-      "primary": "#2796e1",
-      "accent": "#3b4786"
+      "primary": "#005fb8",
+      "accent": "#f4c400"
     },
 
     "hero": {
-      "title": "Personalized Learning for School Students",
-      "subtitle": "Build strong academic foundations with expert guidance in languages and core subjects across Kerala & CBSE syllabus.",
-      "image": "/hero.png",
+      "title": "Online Tuition for Class 1 - 12",
+      "subtitle": "A customised learning experience with dedicated one-to-one guidance for better clarity, confidence, and academic results.",
+      "image": "/hero.jpeg",
 
       "bunnyVideoId": "",
-      "poster": "/hero.jpg"
+      "poster": "/preview.jpeg"
     },
 
     "preview": {
-      "badge": "Learning Academy",
-      "title": "Focused tuition for school success",
-      "highlight": "Basics • Advanced • School Syllabus",
-      "description": "Tutorx Learning Academy provides structured and personalized tuition for students from Class 1 to 10. We focus on building strong fundamentals, improving language skills, and helping students excel in both Kerala and CBSE syllabus.",
+      "badge": "Online Tuition Center",
+      "title": "Personalized academic support for every student",
+      "highlight": "CBSE • ICSE • IB • IGCSE • STATE",
+      "description": "Emmie's Tuition Center offers expert online tuition for students from Class 1 to 12 across State, CBSE, ICSE, IB, and IGCSE syllabus. We provide one-to-one learning support, flexible timings, and experienced faculty to help students improve understanding and achieve better academic performance.",
 
       "bunnyVideoId": "",
       "libraryId": "",
-      "poster": "/preview.webp",
+      "poster": "/preview.jpeg",
 
       "videoUrl": "",
 
       "perks": [
-        { "value": "FOUNDATION", "label": "Strong Basics in Core Subjects" },
-        { "value": "GUIDANCE", "label": "Personalized Academic Support" }
+        {
+          "value": "ONE-TO-ONE",
+          "label": "Dedicated Personal Guidance"
+        },
+        {
+          "value": "ALL SYLLABUS",
+          "label": "State, CBSE, ICSE, IB & IGCSE Support"
+        }
       ]
     },
 
     "pricingInfo": {
       "title": "Program Information",
       "items": [
-        "Classes for students from 1 to 10",
-        "Separate focus on basics & advanced learning",
-        "Affordable fee structure",
-        "Small batch learning",
-        "Regular assessments and progress tracking"
+        "Online tuition for Class 1 to 12",
+        "One-to-one personalised learning",
+        "State, CBSE, ICSE, IB & IGCSE syllabus",
+        "Flexible and affordable fee structure",
+        "Expert teachers with student-focused teaching methods"
       ]
     },
 
     "schedule": {
-      "title": "Learning Format",
+      "title": "Class Format",
       "details": [
-        "Online / Offline classes (based on availability)",
-        "Flexible batch timings",
-        "Small group sessions",
-        "Regular revision & practice sessions",
-        "Doubt clearing support"
+        "Live online classes",
+        "Flexible class timings",
+        "One-to-one sessions available",
+        "Regular revision and doubt-clearing support",
+        "Customised learning plans based on student needs"
       ]
     },
 
     "features": [
-      "Strong foundation classes in core subjects",
-      "Advanced English & Hindi programs",
-      "Kerala & CBSE syllabus coverage",
-      "Individual attention in small batches",
-      "Language skill development",
-      "Student-friendly teaching approach"
+      "Dedicated one-to-one tuition",
+      "Experienced and supportive faculty",
+      "Flexible learning schedules",
+      "Affordable tuition programs",
+      "All major syllabus coverage",
+      "Focused academic improvement and clarity"
     ],
 
     "courses": {
       "categories": [
         {
-          "title": "Basic Foundation (Primary)",
+          "title": "Primary School",
           "items": [
-            "English",
-            "Malayalam",
-            "Mathematics",
-            "Hindi",
-            "Arabic"
+            "Class 1 - 5 All Subjects",
+            "Foundation Learning",
+            "Language Development"
           ]
         },
         {
-          "title": "Elite Programs",
+          "title": "Middle School",
           "items": [
-            "Elite English (Advanced English)",
-            "Elite Hindi (Advanced Hindi)"
+            "Class 6 - 8 All Subjects",
+            "Mathematics & Science Support",
+            "Exam Preparation"
           ]
         },
         {
-          "title": "Kerala Syllabus",
+          "title": "High School & Higher Secondary",
           "items": [
-            "Class 5–10 (English Medium)",
-            "Class 5–10 (Malayalam Medium)"
+            "Class 9 - 12 Tuition",
+            "Board Exam Preparation",
+            "Advanced Subject Coaching"
           ]
         },
         {
-          "title": "CBSE Syllabus",
+          "title": "Syllabus Covered",
           "items": [
-            "Class 1–10 All Subjects"
+            "State Syllabus",
+            "CBSE",
+            "ICSE",
+            "IB",
+            "IGCSE"
           ]
         }
       ]
@@ -109,40 +119,40 @@
 
     "team": [
       {
-        "name": "Tutorx Faculty",
-        "role": "Experienced Teachers",
-        "qualification": "Subject Experts in School Education",
+        "name": "Emmie's Faculty Team",
+        "role": "Expert Tutors",
+        "qualification": "Experienced Subject Specialists",
         "image": "/team.jpg"
       }
     ],
 
     "reviews": [
       {
-        "name": "Akhil Raj",
-        "role": "Student",
-        "rating": 5,
-        "text": "Very helpful classes. My basics improved a lot."
-      },
-      {
-        "name": "Fathima Noor",
+        "name": "Aisha Rahman",
         "role": "Parent",
         "rating": 5,
-        "text": "Teachers give good attention to each student. Highly recommended."
+        "text": "Very supportive teachers and flexible timings. My child has improved a lot in studies."
       },
       {
-        "name": "Sreya K",
+        "name": "Nihal Joseph",
         "role": "Student",
-        "rating": 4,
-        "text": "Good coaching for both school syllabus and languages."
+        "rating": 5,
+        "text": "The one-to-one classes helped me understand difficult subjects easily."
+      },
+      {
+        "name": "Fidha M",
+        "role": "Parent",
+        "rating": 5,
+        "text": "Excellent online tuition center with experienced staff and personal attention."
       }
     ],
 
     "contact": {
-      "email": "tutorxlearningacademy@gmail.com",
-      "phone": "+91 94973 40940",
-      "whatsapp": "9497340940",
+      "email": "emmiestuitioncenter@gmail.com",
+      "phone": "+91 86068 34949",
+      "whatsapp": "8606834949",
       "address": "Kerala, India",
-      "supportName": "Tutorx Support Team",
+      "supportName": "Emmie's Support Team",
       "image": "/support.jpg"
     }
   }

@@ -48,7 +48,7 @@ export default function Hero() {
               <img
                 src={brand.hero.image}
                 alt={brand.siteName}
-                className={`relative z-10 ${brand.theme.shape?.radius || ""}  object-cover aspect-[4/4] w-full `}
+                className={`relative z-10 ${brand.theme.shape?.radius || ""}  object-cover aspect-[4/5] w-full `}
               />
             ) : (
               <div className={`relative z-10 ${brand.theme.layout.panel} aspect-[4/3] w-full flex items-center justify-center`}>
@@ -155,7 +155,7 @@ export default function Hero() {
             <img
               src={brand.hero.image}
               alt="Learning"
-              className={`relative z-10 ${brand.theme.shape?.radius || ""}  object-cover aspect-[4/4] w-full `}
+              className={`relative z-10 ${brand.theme.shape?.radius || ""}  object-cover aspect-[4/5] w-full `}
             />
           ) : (
             <div className={`relative z-10 ${brand.theme.layout.panel} aspect-[4/3] w-full flex items-center justify-center`}>
